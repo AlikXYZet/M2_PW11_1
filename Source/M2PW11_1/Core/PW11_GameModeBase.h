@@ -4,13 +4,13 @@
 
 #include "CoreMinimal.h"
 #include "GameFramework/GameModeBase.h"
-#include "M2PW11_1GameModeBase.generated.h"
+#include "PW11_GameModeBase.generated.h"
 
 /**
  * 
  */
 UCLASS()
-class M2PW11_1_API AM2PW11_1GameModeBase : public AGameModeBase
+class M2PW11_1_API APW11_GameModeBase : public AGameModeBase
 {
 	GENERATED_BODY()
 	
