@@ -9,49 +9,38 @@
 
 
 
-class APW11_GameStateBase;
+/* ---   Threads   --- */
 
-
-
-/* ---   TGraphTask   --- */
-
-/**Класс таска потока-Потребителя
+/**Класс потока-Потребителя
  * @param Делегат для FOnNewStudentData
  */
-class FTask_ConsumerOfStudentData
+class M2PW11_1_API FConsumer_Runnable : public FRunnable
 {
-    FOnNewStudentData TaskDelegate_OnNewStudentData;
-
 public:
-    FTask_ConsumerOfStudentData(FOnNewStudentData iDelegate)
-        : TaskDelegate_OnNewStudentData(iDelegate) {}
 
-    ~FTask_ConsumerOfStudentData() {}
+    FConsumer_Runnable(FOnNewStudentDataDelegate &iDelegate);
 
-    FORCEINLINE TStatId GetStatId() const
-    {
-        RETURN_QUICK_DECLARE_CYCLE_STAT(FTask_ConsumerOfStudentData, STATGROUP_TaskGraphTasks);
-    }
+    virtual ~FConsumer_Runnable() override;
 
-    static ENamedThreads::Type GetDesiredThread()
-    {
+    /* ---   in FRunnable   --- */
 
-        FAutoConsoleTaskPriority myTaskPriority(
-            TEXT("TaskGraph.TaskPriorities.LoadFileToString"),
-            TEXT("Task and thread priority for file loading."),
-            ENamedThreads::BackgroundThreadPriority,
-            ENamedThreads::NormalTaskPriority,
-            ENamedThreads::NormalTaskPriority);
+    virtual bool Init() override;
+    virtual uint32 Run() override;
+    virtual void Stop() override;
+    virtual void Exit() override;
+    //--------------------------------------------
 
-        return myTaskPriority.Get();
-    }
+private:
 
-    static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::FireAndForget; }
+    // Контроль работы потока
+    //FThreadSafeBool bIsStopThread = false;
+    bool bIsStopThread = false;
+
+    // Делегат передачи данных о новом студенте
+    FOnNewStudentDataDelegate &ThreadDelegate;
 
     // Реакция на делегат: Добавить одного студента
     void DReact_AddStudent(const FStudentData iStudentData);
-
-    void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef &MyCompletionGraphEvent);
 };
 //----------------------------------------------------------------------------------------
 
@@ -73,12 +62,18 @@ public:
 
 private:
 
-    /* ---   FTask_ConsumerOfStudentData   --- */
+    /* ---   Threads   --- */
+
+    FConsumer_Runnable *rConsumer_Class = nullptr;
+    FRunnableThread *rConsumer_Thread = nullptr;
 
     // Делегат передачи данных о новом студенте
-    FOnNewStudentData OnNewStudentData;
+    FOnNewStudentDataDelegate OnNewStudentDataDelegate;
 
-    // Таск потока-Продюсера
-    TGraphTask<FTask_ConsumerOfStudentData> *rConsumerTask;
+    // Создание потока-Получателя
+    void CreateConsumerThread();
+
+    // Останов потока-Получателя
+    void StopConsumerThread();
     //--------------------------------------------
 };

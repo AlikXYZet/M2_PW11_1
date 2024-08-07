@@ -25,5 +25,5 @@ struct FStudentData
 /* ---   Delegates   --- */
 
 // Делегат передачи данных о новом студенте
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnNewStudentData, FStudentData /* NewStudentData */)
+DECLARE_DELEGATE_OneParam(FOnNewStudentDataDelegate, FStudentData NewStudentData);
 //----------------------------------------------------------------------------------------

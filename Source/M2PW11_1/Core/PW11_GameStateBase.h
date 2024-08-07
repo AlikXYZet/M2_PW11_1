@@ -16,10 +16,10 @@
  */
 class FTask_ProducerOfStudentData
 {
-    FOnNewStudentData TaskDelegate_OnNewStudentData;
+    FOnNewStudentDataDelegate TaskDelegate_OnNewStudentData;
 
 public:
-    FTask_ProducerOfStudentData(FOnNewStudentData iDelegate)
+    FTask_ProducerOfStudentData(FOnNewStudentDataDelegate iDelegate)
         : TaskDelegate_OnNewStudentData(iDelegate) {}
 
     ~FTask_ProducerOfStudentData() {}
@@ -76,7 +76,7 @@ public:
     /* ---   FTask_ProducerOfStudentData   --- */
 
     // Делегат передачи данных о новом студенте
-    FOnNewStudentData OnNewStudentData;
+    FOnNewStudentDataDelegate OnNewStudentDataDelegate;
 
     // Таск потока-Продюсера
     TGraphTask<FTask_ProducerOfStudentData> *rProducerTask;

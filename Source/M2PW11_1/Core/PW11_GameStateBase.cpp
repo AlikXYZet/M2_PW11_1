@@ -1,7 +1,4 @@
 ﻿#include "PW11_GameStateBase.h"
-#include "Async/TaskGraphInterfaces.h"
-#include "HAL/ThreadManager.h"
-#include "Kismet/GameplayStatics.h"
 
 #include "M2PW11_1/Tools/MyRandom.h"
 
@@ -24,7 +21,10 @@ void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, cons
 
             FPlatformProcess::Sleep(GetRandomFloat(0.1f, 1.f));
 
-            TaskDelegate_OnNewStudentData.Broadcast(lStudentData);
+            if (TaskDelegate_OnNewStudentData.IsBound())
+            {
+                TaskDelegate_OnNewStudentData.Execute(lStudentData);
+            }
         }
     }
 }
@@ -44,10 +44,10 @@ void APW11_GameStateBase::BeginPlay()
     Super::BeginPlay();
 
     // Подписка на делегат. 
-    OnNewStudentData.AddUObject(this, &APW11_GameStateBase::DReact_AddStudent);
+    //OnNewStudentDataDelegate.BindUObject(this, &APW11_GameStateBase::DReact_AddStudent);
 
     rProducerTask = TGraphTask<FTask_ProducerOfStudentData>::CreateTask(nullptr, ENamedThreads::AnyThread)
-        .ConstructAndHold(OnNewStudentData);
+        .ConstructAndHold(OnNewStudentDataDelegate);
 
     if (rProducerTask)
         if (!rProducerTask->GetCompletionEvent().IsValid())
@@ -88,5 +88,6 @@ void APW11_GameStateBase::EmptyStudentDatabase()
 void APW11_GameStateBase::DReact_AddStudent(const FStudentData iStudentData)
 {
     StudentsDatabase.Add(iStudentData.Nickname, iStudentData);
+    UE_LOG(LogTemp, Warning, TEXT("APW11_GameStateBase::DReact_AddStudent:   Nickname - %s"), *iStudentData.Nickname);
 }
 //----------------------------------------------------------------------------------------
