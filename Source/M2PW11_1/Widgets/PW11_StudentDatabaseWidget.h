@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
 
+#include "MessageEndpoint.h"
+
 #include "M2PW11_1/Tools/MyStruct.h"
 
 #include "PW11_StudentDatabaseWidget.generated.h"
@@ -11,16 +13,14 @@
 
 /* ---   Threads   --- */
 
-/**Класс потока-Потребителя
- * @param Делегат для FOnNewStudentData
- */
+//Класс потока-Потребителя
 class M2PW11_1_API FConsumer_Runnable : public FRunnable
 {
 public:
 
-    FConsumer_Runnable(FOnNewStudentDataDelegate &iDelegate);
+    FConsumer_Runnable() {};
 
-    virtual ~FConsumer_Runnable() override;
+    virtual ~FConsumer_Runnable() override {};
 
     /* ---   in FRunnable   --- */
 
@@ -36,11 +36,13 @@ private:
     //FThreadSafeBool bIsStopThread = false;
     bool bIsStopThread = false;
 
-    // Делегат передачи данных о новом студенте
-    FOnNewStudentDataDelegate &ThreadDelegate;
+    // "Получатель" данных
+    TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataReceiver;
 
-    // Реакция на делегат: Добавить одного студента
-    void DReact_AddStudent(const FStudentData iStudentData);
+    // "Обрабодчик" данных
+    void BM_StudentDataHandler(
+        const struct FStudentData &Message,
+        const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context);
 };
 //----------------------------------------------------------------------------------------
 
@@ -66,9 +68,6 @@ private:
 
     FConsumer_Runnable *rConsumer_Class = nullptr;
     FRunnableThread *rConsumer_Thread = nullptr;
-
-    // Делегат передачи данных о новом студенте
-    FOnNewStudentDataDelegate OnNewStudentDataDelegate;
 
     // Создание потока-Получателя
     void CreateConsumerThread();

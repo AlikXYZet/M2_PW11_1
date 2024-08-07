@@ -1,16 +1,28 @@
 ﻿#include "PW11_GameStateBase.h"
 
+#include "MessageEndpointBuilder.h"
+
 #include "M2PW11_1/Tools/MyRandom.h"
 
 
 
 /* ---   FTask_ProducerOfStudentData   --- */
 
+FTask_ProducerOfStudentData::FTask_ProducerOfStudentData()
+{
+    ME_StudentDataSender = FMessageEndpoint::Builder("Sender_Producer_Task").Build();;
+}
+
 void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef &MyCompletionGraphEvent)
 {
-    if (TaskDelegate_OnNewStudentData.IsBound())
+    /**
+    * Инициализация рандомных данных и их отправка получателям
+    */
+
+    if (ME_StudentDataSender.IsValid())
     {
         FStudentData lStudentData;
+
         for (int8 i = 0; i < 20; ++i)
         {
             lStudentData = {
@@ -19,13 +31,13 @@ void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, cons
             GetRandomRating(),
             GetRandomID() };
 
+            // Имитация задержки данных
             FPlatformProcess::Sleep(GetRandomFloat(0.1f, 1.f));
 
-            if (TaskDelegate_OnNewStudentData.IsBound())
-            {
-                TaskDelegate_OnNewStudentData.Execute(lStudentData);
-            }
+            ME_StudentDataSender->Publish<FStudentData>(new FStudentData(lStudentData));
         }
+
+        ME_StudentDataSender.Reset();
     }
 }
 //----------------------------------------------------------------------------------------
@@ -43,12 +55,11 @@ void APW11_GameStateBase::BeginPlay()
 {
     Super::BeginPlay();
 
-    // Подписка на делегат. 
-    //OnNewStudentDataDelegate.BindUObject(this, &APW11_GameStateBase::DReact_AddStudent);
-
+    // Инициализация Таска
     rProducerTask = TGraphTask<FTask_ProducerOfStudentData>::CreateTask(nullptr, ENamedThreads::AnyThread)
-        .ConstructAndHold(OnNewStudentDataDelegate);
+        .ConstructAndHold();
 
+    // Запуск Таска
     if (rProducerTask)
         if (!rProducerTask->GetCompletionEvent().IsValid())
         {

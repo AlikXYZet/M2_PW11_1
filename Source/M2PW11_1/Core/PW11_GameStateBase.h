@@ -3,6 +3,8 @@
 #include "CoreMinimal.h"
 #include "GameFramework/GameStateBase.h"
 
+#include "MessageEndpoint.h"
+
 #include "M2PW11_1/Tools/MyStruct.h"
 
 #include "PW11_GameStateBase.generated.h"
@@ -16,11 +18,11 @@
  */
 class FTask_ProducerOfStudentData
 {
-    FOnNewStudentDataDelegate TaskDelegate_OnNewStudentData;
+    // "Отправитель" данных
+    TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataSender;
 
 public:
-    FTask_ProducerOfStudentData(FOnNewStudentDataDelegate iDelegate)
-        : TaskDelegate_OnNewStudentData(iDelegate) {}
+    FTask_ProducerOfStudentData();
 
     ~FTask_ProducerOfStudentData() {}
 
@@ -74,9 +76,6 @@ public:
 
 
     /* ---   FTask_ProducerOfStudentData   --- */
-
-    // Делегат передачи данных о новом студенте
-    FOnNewStudentDataDelegate OnNewStudentDataDelegate;
 
     // Таск потока-Продюсера
     TGraphTask<FTask_ProducerOfStudentData> *rProducerTask;

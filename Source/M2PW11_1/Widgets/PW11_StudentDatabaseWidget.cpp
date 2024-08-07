@@ -1,34 +1,25 @@
 #include "PW11_StudentDatabaseWidget.h"
 
+#include "MessageEndpointBuilder.h"
+
 #include "M2PW11_1/Core/PW11_GameStateBase.h"
 
 
 
 /* ---   Threads   --- */
-
-FConsumer_Runnable::FConsumer_Runnable(FOnNewStudentDataDelegate &iDelegate)
-    : ThreadDelegate(iDelegate)
-{
-    //ThreadDelegate = iDelegate;
-}
-
-FConsumer_Runnable::~FConsumer_Runnable()
-{
-}
-
 bool FConsumer_Runnable::Init()
 {
-    ThreadDelegate.BindRaw(this, &FConsumer_Runnable::DReact_AddStudent);
+    ME_StudentDataReceiver = FMessageEndpoint::Builder(TEXT("Receiver_StudentData_Runnable"))
+        .Handling<FStudentData>(this, &FConsumer_Runnable::BM_StudentDataHandler);
 
-    UE_LOG(LogTemp, Error, TEXT("FConsumer_Runnable::Init"));
+    if (ME_StudentDataReceiver.IsValid())
+        ME_StudentDataReceiver->Subscribe<FStudentData>();
 
     return true;
 }
 
 uint32 FConsumer_Runnable::Run()
 {
-    UE_LOG(LogTemp, Error, TEXT("FConsumer_Runnable::Run"));
-
     while (!bIsStopThread)
     {
         FPlatformProcess::Sleep(0.01f);
@@ -39,19 +30,18 @@ uint32 FConsumer_Runnable::Run()
 
 void FConsumer_Runnable::Stop()
 {
-    UE_LOG(LogTemp, Error, TEXT("FConsumer_Runnable::Stop"));
-
     bIsStopThread = true;
 }
 
 void FConsumer_Runnable::Exit()
 {
-    UE_LOG(LogTemp, Error, TEXT("FConsumer_Runnable::Exit"));
+    if (ME_StudentDataReceiver.IsValid())
+        ME_StudentDataReceiver.Reset();
 }
 
-void FConsumer_Runnable::DReact_AddStudent(const FStudentData iStudentData)
+void FConsumer_Runnable::BM_StudentDataHandler(const FStudentData &Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context)
 {
-    UE_LOG(LogTemp, Error, TEXT("FConsumer_Runnable::DReact_AddStudent:   Nickname - %s"), *iStudentData.Nickname);
+    UE_LOG(LogTemp, Error, TEXT("FConsumer_Runnable::BM_StudentDataHandler NickName - %s"), *Message.Nickname);
 }
 //----------------------------------------------------------------------------------------
 
@@ -77,20 +67,14 @@ void UPW11_StudentDatabaseWidget::CreateConsumerThread()
     {
         if (!rConsumer_Class)
         {
-            APW11_GameStateBase *CurrentGameState = Cast<APW11_GameStateBase>(GetWorld()->GetGameState());
-            rConsumer_Class = new FConsumer_Runnable(CurrentGameState->OnNewStudentDataDelegate);
-
-            //rConsumer_Class = new FConsumer_Runnable(OnNewStudentDataDelegate);
+            rConsumer_Class = new FConsumer_Runnable();
         }
-
 
         rConsumer_Thread = FRunnableThread::Create(
             rConsumer_Class,
             TEXT("ConsumerThread"),
             0,
             EThreadPriority::TPri_Normal);
-
-        UE_LOG(LogTemp, Warning, TEXT("Create ConsumerThread"));
     }
 }
 
@@ -103,8 +87,6 @@ void UPW11_StudentDatabaseWidget::StopConsumerThread()
 
         rConsumer_Thread = nullptr;
         rConsumer_Class = nullptr;
-
-        UE_LOG(LogTemp, Warning, TEXT("Stop ConsumerThread"));
     }
 }
 //----------------------------------------------------------------------------------------
