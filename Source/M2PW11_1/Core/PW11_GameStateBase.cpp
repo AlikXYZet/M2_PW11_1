@@ -22,7 +22,7 @@ void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, cons
             GetRandomRating(),
             GetRandomID() };
 
-            FPlatformProcess::Sleep(GetRandomFloat(0.5f, 3.f));
+            FPlatformProcess::Sleep(GetRandomFloat(0.1f, 1.f));
 
             TaskDelegate_OnNewStudentData.Broadcast(lStudentData);
         }
@@ -48,6 +48,12 @@ void APW11_GameStateBase::BeginPlay()
 
     rProducerTask = TGraphTask<FTask_ProducerOfStudentData>::CreateTask(nullptr, ENamedThreads::AnyThread)
         .ConstructAndHold(OnNewStudentData);
+
+    if (rProducerTask)
+        if (!rProducerTask->GetCompletionEvent().IsValid())
+        {
+            rProducerTask->Unlock();
+        }
 }
 
 void APW11_GameStateBase::Tick(float DeltaTime)
@@ -58,6 +64,10 @@ void APW11_GameStateBase::Tick(float DeltaTime)
 void APW11_GameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
     Super::EndPlay(EndPlayReason);
+
+    EmptyStudentDatabase();
+
+    rProducerTask = nullptr;
 }
 //----------------------------------------------------------------------------------------
 

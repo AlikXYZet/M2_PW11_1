@@ -4,6 +4,9 @@
 #include "MyStruct.generated.h"
 
 
+
+/* ---   Structs   --- */
+
 // Структура данных о студентах
 USTRUCT(BlueprintType)
 struct FStudentData
@@ -15,3 +18,12 @@ struct FStudentData
     uint8 Rating;
     uint32 ID = 0;
 };
+//----------------------------------------------------------------------------------------
+
+
+
+/* ---   Delegates   --- */
+
+// Делегат передачи данных о новом студенте
+DECLARE_MULTICAST_DELEGATE_OneParam(FOnNewStudentData, FStudentData /* NewStudentData */)
+//----------------------------------------------------------------------------------------

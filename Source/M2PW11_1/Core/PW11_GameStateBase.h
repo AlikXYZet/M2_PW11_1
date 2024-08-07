@@ -9,19 +9,11 @@
 
 
 
-/* ---   Delegates   --- */
-
-// Делегат передачи данных о новом студенте
-DECLARE_MULTICAST_DELEGATE_OneParam(FOnNewStudentData, FStudentData StudentData)
-//----------------------------------------------------------------------------------------
-
-
-
 /* ---   TGraphTask   --- */
 
 /**Класс таска потока-Продюсера
  * @param Делегат для FOnNewStudentData
- */ 
+ */
 class FTask_ProducerOfStudentData
 {
     FOnNewStudentData TaskDelegate_OnNewStudentData;
