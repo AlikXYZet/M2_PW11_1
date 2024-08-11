@@ -57,10 +57,10 @@ class M2PW11_1_API FConsumer_Runnable : public FRunnable
 public:
 
 	/** Конструктор потока получения данных
-	* 
+	*
 	* @param irSDWidget - Указатель на виджет.
 	* Необходим для использования делегатов и передачи отсортированного массива в TQueue
-	* 
+	*
 	* @param iCurrentStudentDatabase - Текущая база данных из GameStateBase
 	*/
 	FConsumer_Runnable(
@@ -79,18 +79,15 @@ public:
 
 private:
 
+	// Контроль работы потока
+    //FThreadSafeBool bIsStopThread = false;
+	bool bIsStopThread = false;
+
 	// Указатель на виджет
 	UPW11_StudentDatabaseWidget *rSDWidget;
 
 	// Локальная база данных потока
 	TArray<FStudentData> LocalStudentDatabase;
-
-	// Контроль работы потока
-	//FThreadSafeBool bIsStopThread = false;
-	bool bIsStopThread = false;
-
-	// "Получатель" данных из другого потока
-	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataReceiver;
 
 	// Текущий предикат сортировки
 	Predicate CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
@@ -98,7 +95,10 @@ private:
 			return first.Nickname < second.Nickname;
 		};
 
-	// "Обрабодчик" данных
+	// "Получатель" данных из другого потока
+	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataReceiver;
+
+	// "Обрабодчик" данных из другого потока
 	void BM_StudentDataHandler(
 		const struct FStudentData &Message,
 		const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context);
