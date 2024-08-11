@@ -18,35 +18,35 @@
  */
 class FTask_ProducerOfStudentData
 {
-    // "Отправитель" данных
-    TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataSender;
+	// "Отправитель" данных
+	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataSender;
 
 public:
-    FTask_ProducerOfStudentData();
+	FTask_ProducerOfStudentData();
 
-    ~FTask_ProducerOfStudentData() {}
+	~FTask_ProducerOfStudentData() {}
 
-    FORCEINLINE TStatId GetStatId() const
-    {
-        RETURN_QUICK_DECLARE_CYCLE_STAT(FTask_ProducerOfStudentData, STATGROUP_TaskGraphTasks);
-    }
+	FORCEINLINE TStatId GetStatId() const
+	{
+		RETURN_QUICK_DECLARE_CYCLE_STAT(FTask_ProducerOfStudentData, STATGROUP_TaskGraphTasks);
+	}
 
-    static ENamedThreads::Type GetDesiredThread()
-    {
+	static ENamedThreads::Type GetDesiredThread()
+	{
 
-        FAutoConsoleTaskPriority myTaskPriority(
-            TEXT("TaskGraph.TaskPriorities.LoadFileToString"),
-            TEXT("Task and thread priority for file loading."),
-            ENamedThreads::BackgroundThreadPriority,
-            ENamedThreads::NormalTaskPriority,
-            ENamedThreads::NormalTaskPriority);
+		FAutoConsoleTaskPriority myTaskPriority(
+			TEXT("TaskGraph.TaskPriorities.LoadFileToString"),
+			TEXT("Task and thread priority for file loading."),
+			ENamedThreads::BackgroundThreadPriority,
+			ENamedThreads::NormalTaskPriority,
+			ENamedThreads::NormalTaskPriority);
 
-        return myTaskPriority.Get();
-    }
+		return myTaskPriority.Get();
+	}
 
-    static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::FireAndForget; }
+	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::FireAndForget; }
 
-    void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef &MyCompletionGraphEvent);
+	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef &MyCompletionGraphEvent);
 };
 //----------------------------------------------------------------------------------------
 
@@ -58,50 +58,53 @@ public:
 UCLASS()
 class M2PW11_1_API APW11_GameStateBase : public AGameStateBase
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
 
-    APW11_GameStateBase();
+	APW11_GameStateBase();
 
 protected:
 
-    virtual void BeginPlay() override;
+	virtual void BeginPlay() override;
 
 public:
 
-    virtual void Tick(float DeltaTime) override;
-    virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
+	virtual void Tick(float DeltaTime) override;
+	virtual void EndPlay(const EEndPlayReason::Type EndPlayReason) override;
 
 
 
-    /* ---   FTask_ProducerOfStudentData   --- */
+	/* ---   FTask_ProducerOfStudentData   --- */
 
-    // Таск потока-Продюсера
-    TGraphTask<FTask_ProducerOfStudentData> *rProducerTask;
-    //--------------------------------------------
+	// Таск потока-Продюсера
+	TGraphTask<FTask_ProducerOfStudentData> *rProducerTask = nullptr;
+	//--------------------------------------------
 
 
 
-    /* ---   Student Database   --- */
+	/* ---   Student Database   --- */
 
-    /** Получить информацию о всех студентах
-    * @return Копия контейнера TMap с базой данных студентов
-    */
-    TMap<FString, FStudentData> GetStudentsDatabase();
+	/** Получить информацию о всех студентах
+	* @return Копия контейнера TMap с базой данных студентов
+	*/
+	TMap<FString, FStudentData> GetStudentsDatabase() const;
 
-    // Сбросить базу данных студентов
-    void EmptyStudentDatabase();
-    //--------------------------------------------
+	// Сбросить базу данных студентов
+	void EmptyStudentDatabase();
+	//--------------------------------------------
 
 private:
 
-    /* ---   Student Database   --- */
+	/* ---   Student Database   --- */
 
-    // База данных студентов
-    TMap<FString, FStudentData> StudentsDatabase;
+	// "Получатель" данных
+	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataReceiver;
 
-    // Реакция на делегат: Добавить одного студента
-    void DReact_AddStudent(const FStudentData iStudentData);
-    //--------------------------------------------
+	// База данных студентов
+	TMap<FString, FStudentData> StudentsDatabase;
+
+	// Реакция на делегат: Добавить одного студента
+	void DReact_AddStudent(const FStudentData &Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context);
+	//--------------------------------------------
 };

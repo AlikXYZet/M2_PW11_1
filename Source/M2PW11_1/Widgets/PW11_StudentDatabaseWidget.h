@@ -1,4 +1,4 @@
-#pragma once
+﻿#pragma once
 
 #include "CoreMinimal.h"
 #include "Blueprint/UserWidget.h"
@@ -11,38 +11,103 @@
 
 
 
+// Тип предиката сортировки
+typedef bool (*Predicate)(const FStudentData &first, const FStudentData &second);
+
+
+
+/* ---   Delegates   --- */
+
+DECLARE_DELEGATE(FReSort);
+DECLARE_DELEGATE_OneParam(FUpdateWidgetData, const int32 /* Quantity */);
+//----------------------------------------------------------------------------------------
+
+
+
+/* ---   ENums   --- */
+
+// Типы сортировки
+UENUM(BlueprintType)
+enum struct ESortType : uint8
+{
+	NONE,
+
+	// Возрастающий список
+	NicknameUp UMETA(DisplayName = "Nickname Up"),
+	AgeUp      UMETA(DisplayName = "Age Up"),
+	RatingUp   UMETA(DisplayName = "Rating Up"),
+	IDUp       UMETA(DisplayName = "ID Up"),
+
+	// Спадающий список
+	NicknameDown = NicknameUp + 0x80 UMETA(DisplayName = "Nickname Down"),
+	AgeDown    UMETA(DisplayName = "Age Down"),
+	RatingDown UMETA(DisplayName = "Rating Down"),
+	IDDown     UMETA(DisplayName = "ID Down"),
+};
+
+//----------------------------------------------------------------------------------------
+
+
+
 /* ---   Threads   --- */
 
-//����� ������-�����������
+//Класс потока-Потребителя
 class M2PW11_1_API FConsumer_Runnable : public FRunnable
 {
 public:
 
-    FConsumer_Runnable() {};
+	/** Конструктор потока получения данных
+	* 
+	* @param irSDWidget - Указатель на виджет.
+	* Необходим для использования делегатов и передачи отсортированного массива в TQueue
+	* 
+	* @param iCurrentStudentDatabase - Текущая база данных из GameStateBase
+	*/
+	FConsumer_Runnable(
+		UPW11_StudentDatabaseWidget *irSDWidget,
+		const TMap<FString, FStudentData> iCurrentStudentDatabase);
 
-    virtual ~FConsumer_Runnable() override {};
+	virtual ~FConsumer_Runnable() override {};
 
-    /* ---   in FRunnable   --- */
+	/* ---   in FRunnable   --- */
 
-    virtual bool Init() override;
-    virtual uint32 Run() override;
-    virtual void Stop() override;
-    virtual void Exit() override;
-    //--------------------------------------------
+	virtual bool Init() override;
+	virtual uint32 Run() override;
+	virtual void Stop() override;
+	virtual void Exit() override;
+	//--------------------------------------------
 
 private:
 
-    // �������� ������ ������
-    //FThreadSafeBool bIsStopThread = false;
-    bool bIsStopThread = false;
+	// Указатель на виджет
+	UPW11_StudentDatabaseWidget *rSDWidget;
 
-    // "����������" ������
-    TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataReceiver;
+	// Локальная база данных потока
+	TArray<FStudentData> LocalStudentDatabase;
 
-    // "����������" ������
-    void BM_StudentDataHandler(
-        const struct FStudentData &Message,
-        const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context);
+	// Контроль работы потока
+	//FThreadSafeBool bIsStopThread = false;
+	bool bIsStopThread = false;
+
+	// "Получатель" данных из другого потока
+	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataReceiver;
+
+	// Текущий предикат сортировки
+	Predicate CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
+		{
+			return first.Nickname < second.Nickname;
+		};
+
+	// "Обрабодчик" данных
+	void BM_StudentDataHandler(
+		const struct FStudentData &Message,
+		const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context);
+
+	// Функция делегата: Смена сортировки
+	void ReSortArray();
+
+	// Передача данных в Виджет
+	void SendDataToWidget();
 };
 //----------------------------------------------------------------------------------------
 
@@ -54,25 +119,57 @@ private:
 UCLASS()
 class M2PW11_1_API UPW11_StudentDatabaseWidget : public UUserWidget
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
 public:
 
-    ~UPW11_StudentDatabaseWidget();
+	/* ---   Base   --- */
 
-    virtual void NativeConstruct() override;
+	~UPW11_StudentDatabaseWidget();
+
+	virtual void NativeConstruct() override;
+	//--------------------------------------------
+
+
+
+	/* ---   Delegates   --- */
+
+	FReSort OnReSort;
+	FUpdateWidgetData OnUpdateWidgetData;
+
+	void PreparationListStudentData(const int32 iQuantity);
+	//--------------------------------------------
+
+
+
+	/* ---   Database in Widget   --- */
+
+	std::atomic<ESortType> CurrentSortType = ESortType::NicknameUp;
+
+	TQueue<FStudentData, EQueueMode::Mpsc> WidgetStudentDatabase;
+
+	// Event обновления данных в Виджете
+	UFUNCTION(BlueprintImplementableEvent, BlueprintPure, Category = "StudentData")
+	void EventUpdateListStudentData(const TArray<FStudentData> &StudentDatabase);
+
+	// Функция изменения типа сортировки
+	UFUNCTION(BlueprintCallable, Category = "StudentData")
+	void SetSortType(const ESortType InSortType);
+	//--------------------------------------------
+
+
 
 private:
 
-    /* ---   Threads   --- */
+	/* ---   Threads   --- */
 
-    FConsumer_Runnable *rConsumer_Class = nullptr;
-    FRunnableThread *rConsumer_Thread = nullptr;
+	FConsumer_Runnable *rConsumer_Class = nullptr;
+	FRunnableThread *rConsumer_Thread = nullptr;
 
-    // �������� ������-����������
-    void CreateConsumerThread();
+	// Создание потока-Получателя
+	void CreateConsumerThread();
 
-    // ������� ������-����������
-    void StopConsumerThread();
-    //--------------------------------------------
+	// Останов потока-Получателя
+	void StopConsumerThread();
+	//--------------------------------------------
 };

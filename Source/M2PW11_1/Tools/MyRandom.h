@@ -4,7 +4,7 @@
 #include <random>
 
 // Получение рандомного значения [min, max]
-int32 GetRandom(const int32 &min, const int32 &max);
+int64 GetRandom(const int64 &min, const int64 &max);
 
 // Получение рандомного bool значения
 bool GetRandom();
@@ -20,11 +20,11 @@ float GetRandomFloat(const float &min = 0.f, const float &max = 1.f);
 FString GetRandomNickname();
 
 // Получение рандомного значения [0, 60]
-uint8 GetRandomAge();
+int GetRandomAge();
 
 // Получение рандомного значения [0, 100]
-uint8 GetRandomRating();
+int GetRandomRating();
 
 // Получение рандомного значения [0, UINT32_MAX]
-uint32 GetRandomID();
+int GetRandomID();
 //--------------------------------------------

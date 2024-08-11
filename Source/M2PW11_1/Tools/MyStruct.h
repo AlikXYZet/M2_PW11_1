@@ -11,11 +11,15 @@
 USTRUCT(BlueprintType)
 struct FStudentData
 {
-    GENERATED_BODY()
+	GENERATED_BODY()
 
-    FString Nickname;
-    uint8 Age;
-    uint8 Rating;
-    uint32 ID = 0;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	FString Nickname;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Age;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int Rating;
+	UPROPERTY(EditAnywhere, BlueprintReadWrite)
+	int ID = 0;
 };
 //----------------------------------------------------------------------------------------
