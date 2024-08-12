@@ -59,12 +59,12 @@ FString GetRandomNickname()
 
 int GetRandomAge()
 {
-	return GetRandom(0, 60);
+	return GetRandom(18, 60);
 }
 
 int GetRandomRating()
 {
-	return GetRandom(0, 100);
+	return GetRandom(25, 100);
 }
 
 int GetRandomID()

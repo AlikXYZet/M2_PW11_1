@@ -21,8 +21,10 @@ class FTask_ProducerOfStudentData
 	// "Отправитель" данных
 	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataSender;
 
+	std::atomic_bool *rbIsStopTask;
+
 public:
-	FTask_ProducerOfStudentData();
+	FTask_ProducerOfStudentData(std::atomic_bool *irbIsStopTask);
 
 	~FTask_ProducerOfStudentData() {}
 
@@ -79,6 +81,8 @@ public:
 
 	// Таск потока-Продюсера
 	TGraphTask<FTask_ProducerOfStudentData> *rProducerTask = nullptr;
+
+	std::atomic_bool bIsStopTask = false;
 	//--------------------------------------------
 
 
@@ -89,9 +93,6 @@ public:
 	* @return Копия контейнера TMap с базой данных студентов
 	*/
 	TMap<FString, FStudentData> GetStudentsDatabase() const;
-
-	// Сбросить базу данных студентов
-	void EmptyStudentDatabase();
 	//--------------------------------------------
 
 private:

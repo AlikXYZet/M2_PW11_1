@@ -19,7 +19,7 @@ typedef bool (*Predicate)(const FStudentData &first, const FStudentData &second)
 /* ---   Delegates   --- */
 
 DECLARE_DELEGATE(FReSort);
-DECLARE_DELEGATE_OneParam(FUpdateWidgetData, const int32 /* Quantity */);
+DECLARE_DELEGATE(FUpdateWidgetData);
 //----------------------------------------------------------------------------------------
 
 
@@ -137,20 +137,20 @@ public:
 	FReSort OnReSort;
 	FUpdateWidgetData OnUpdateWidgetData;
 
-	void PreparationListStudentData(const int32 iQuantity);
+	void PreparationListStudentData();
 	//--------------------------------------------
 
 
 
 	/* ---   Database in Widget   --- */
 
-	std::atomic<ESortType> CurrentSortType = ESortType::NicknameUp;
+	TArray< FStudentData> ArrayStudentData;
 
-	TQueue<FStudentData, EQueueMode::Mpsc> WidgetStudentDatabase;
+	std::atomic<ESortType> CurrentSortType = ESortType::NicknameUp;
 
 	// Event обновления данных в Виджете
 	UFUNCTION(BlueprintImplementableEvent, BlueprintPure, Category = "StudentData")
-	void EventUpdateListStudentData(const TArray<FStudentData> &StudentDatabase);
+	void UpdateWidgetStudentData(const TArray<FStudentData> &StudentDatabase);
 
 	// Функция изменения типа сортировки
 	UFUNCTION(BlueprintCallable, Category = "StudentData")

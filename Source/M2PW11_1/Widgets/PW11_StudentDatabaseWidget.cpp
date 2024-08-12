@@ -57,6 +57,8 @@ void FConsumer_Runnable::Stop()
 
 void FConsumer_Runnable::Exit()
 {
+	rSDWidget->OnReSort.Unbind();
+
 	if (ME_StudentDataReceiver.IsValid())
 		ME_StudentDataReceiver.Reset();
 
@@ -141,12 +143,9 @@ void FConsumer_Runnable::SendDataToWidget()
 {
 	LocalStudentDatabase.Sort(CurrentSortingPredicate);
 
-	for (auto &Data : LocalStudentDatabase)
-	{
-		rSDWidget->WidgetStudentDatabase.Enqueue(Data);
-	}
+	rSDWidget->ArrayStudentData = LocalStudentDatabase;
 
-	rSDWidget->OnUpdateWidgetData.ExecuteIfBound(LocalStudentDatabase.Num());
+	rSDWidget->OnUpdateWidgetData.ExecuteIfBound();
 }
 //----------------------------------------------------------------------------------------
 
@@ -168,8 +167,6 @@ void UPW11_StudentDatabaseWidget::NativeConstruct()
 	CreateConsumerThread();
 
 	OnUpdateWidgetData.BindUObject(this, &UPW11_StudentDatabaseWidget::PreparationListStudentData);
-
-	SetSortType(ESortType::NicknameUp);
 }
 //----------------------------------------------------------------------------------------
 
@@ -177,18 +174,9 @@ void UPW11_StudentDatabaseWidget::NativeConstruct()
 
 /* ---   Delegates   --- */
 
-void UPW11_StudentDatabaseWidget::PreparationListStudentData(const int32 iQuantity)
+void UPW11_StudentDatabaseWidget::PreparationListStudentData()
 {
-	TArray<FStudentData> lDatabase;
-	FStudentData lData;
-
-	for (int32 i = 0; i < iQuantity; i++)
-	{
-		if (WidgetStudentDatabase.Dequeue(lData))
-			lDatabase.Add(lData);
-	}
-
-	EventUpdateListStudentData(lDatabase);
+	UpdateWidgetStudentData(ArrayStudentData);
 }
 //----------------------------------------------------------------------------------------
 

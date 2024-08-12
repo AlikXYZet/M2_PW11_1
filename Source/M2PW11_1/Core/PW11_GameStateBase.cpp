@@ -8,8 +8,10 @@
 
 /* ---   FTask_ProducerOfStudentData   --- */
 
-FTask_ProducerOfStudentData::FTask_ProducerOfStudentData()
+FTask_ProducerOfStudentData::FTask_ProducerOfStudentData(std::atomic_bool *irbIsStopTask)
 {
+	rbIsStopTask = irbIsStopTask;
+
 	ME_StudentDataSender = FMessageEndpoint::Builder("Sender_Producer_Task").Build();;
 }
 
@@ -23,7 +25,7 @@ void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, cons
 	{
 		FStudentData lStudentData;
 
-		for (int8 i = 0; i < 20; ++i)
+		for (int8 i = 0; !*rbIsStopTask && i < 20; ++i)
 		{
 			lStudentData = {
 			GetRandomNickname(),
@@ -34,7 +36,8 @@ void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, cons
 			// Имитация задержки данных
 			FPlatformProcess::Sleep(GetRandomFloat(0.1f, 1.f));
 
-			ME_StudentDataSender->Publish<FStudentData>(new FStudentData(lStudentData));
+			if (!*rbIsStopTask)
+				ME_StudentDataSender->Publish<FStudentData>(new FStudentData(lStudentData));
 		}
 
 		ME_StudentDataSender.Reset();
@@ -49,7 +52,6 @@ void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, cons
 APW11_GameStateBase::APW11_GameStateBase()
 {
 	PrimaryActorTick.bCanEverTick = true;
-	//PrimaryActorTick.TickInterval = 5.f;
 }
 
 void APW11_GameStateBase::BeginPlay()
@@ -59,7 +61,7 @@ void APW11_GameStateBase::BeginPlay()
 	// Инициализация Таска
 	rProducerTask = TGraphTask<FTask_ProducerOfStudentData>
 		::CreateTask(nullptr, ENamedThreads::AnyThread)
-		.ConstructAndHold();
+		.ConstructAndHold(&bIsStopTask);
 
 	// Запуск Таска
 	if (rProducerTask)
@@ -80,20 +82,17 @@ void APW11_GameStateBase::BeginPlay()
 void APW11_GameStateBase::Tick(float DeltaTime)
 {
 	Super::Tick(DeltaTime);
-
-	//for (auto& Data : StudentsDatabase)
-	//{
-	//	UE_LOG(LogTemp, Error,
-	//		TEXT("In:   Nickname - %s"),
-	//		*Data.Value.Nickname);
-	//}
 }
 
 void APW11_GameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
 	Super::EndPlay(EndPlayReason);
 
-	EmptyStudentDatabase();
+	bIsStopTask = true;
+
+	ME_StudentDataReceiver.Reset();
+
+	StudentsDatabase.Empty();
 
 	rProducerTask = nullptr;
 }
@@ -106,11 +105,6 @@ void APW11_GameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 TMap<FString, FStudentData> APW11_GameStateBase::GetStudentsDatabase() const
 {
 	return StudentsDatabase;
-}
-
-void APW11_GameStateBase::EmptyStudentDatabase()
-{
-	StudentsDatabase.Empty();
 }
 
 void APW11_GameStateBase::DReact_AddStudent(const FStudentData &Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context)
