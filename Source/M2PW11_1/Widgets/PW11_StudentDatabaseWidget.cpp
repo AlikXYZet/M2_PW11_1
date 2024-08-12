@@ -20,6 +20,9 @@ FConsumer_Runnable::FConsumer_Runnable(
 	{
 		LocalStudentDatabase.Add(Data.Value);
 	}
+
+	UE_LOG(LogTemp, Error, TEXT("GameThreadID - %d"), FPlatformTLS::GetCurrentThreadId());
+
 }
 
 bool FConsumer_Runnable::Init()
@@ -35,7 +38,7 @@ bool FConsumer_Runnable::Init()
 	// Подписка функции на делегат
 	rSDWidget->OnReSort.BindRaw(this, &FConsumer_Runnable::ReSortArray);
 
-	//UE_LOG(LogTemp, Error, TEXT("FConsumer_Runnable::Init   CurrentThreadId - %d"), FPlatformTLS::GetCurrentThreadId());
+	UE_LOG(LogTemp, Error, TEXT("RunnableThreadId - %d"), FPlatformTLS::GetCurrentThreadId());
 
 	return true;
 }
@@ -146,6 +149,8 @@ void FConsumer_Runnable::SendDataToWidget()
 	rSDWidget->ArrayStudentData = LocalStudentDatabase;
 
 	rSDWidget->OnUpdateWidgetData.ExecuteIfBound();
+
+	rSDWidget->OnDelegateTest.Broadcast();
 }
 //----------------------------------------------------------------------------------------
 
@@ -167,6 +172,8 @@ void UPW11_StudentDatabaseWidget::NativeConstruct()
 	CreateConsumerThread();
 
 	OnUpdateWidgetData.BindUObject(this, &UPW11_StudentDatabaseWidget::PreparationListStudentData);
+
+	OnDelegateTest.AddDynamic(this, &UPW11_StudentDatabaseWidget::PrintCurrentThreadID);
 }
 //----------------------------------------------------------------------------------------
 
@@ -177,6 +184,11 @@ void UPW11_StudentDatabaseWidget::NativeConstruct()
 void UPW11_StudentDatabaseWidget::PreparationListStudentData()
 {
 	UpdateWidgetStudentData(ArrayStudentData);
+}
+
+void UPW11_StudentDatabaseWidget::PrintCurrentThreadID()
+{
+	UE_LOG(LogTemp, Warning, TEXT("PrintCurrentThreadID - %d"), FPlatformTLS::GetCurrentThreadId());
 }
 //----------------------------------------------------------------------------------------
 

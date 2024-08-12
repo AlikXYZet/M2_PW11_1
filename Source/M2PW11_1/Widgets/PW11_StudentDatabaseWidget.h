@@ -20,6 +20,7 @@ typedef bool (*Predicate)(const FStudentData &first, const FStudentData &second)
 
 DECLARE_DELEGATE(FReSort);
 DECLARE_DELEGATE(FUpdateWidgetData);
+DECLARE_DYNAMIC_MULTICAST_DELEGATE(FDelegateTest);
 //----------------------------------------------------------------------------------------
 
 
@@ -138,6 +139,12 @@ public:
 	FUpdateWidgetData OnUpdateWidgetData;
 
 	void PreparationListStudentData();
+
+	UPROPERTY(BlueprintAssignable);
+	FDelegateTest OnDelegateTest;
+
+	UFUNCTION(BlueprintCallable)
+	void PrintCurrentThreadID();
 	//--------------------------------------------
 
 
