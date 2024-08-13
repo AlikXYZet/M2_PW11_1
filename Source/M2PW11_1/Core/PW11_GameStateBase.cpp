@@ -17,9 +17,7 @@ FTask_ProducerOfStudentData::FTask_ProducerOfStudentData(std::atomic_bool *irbIs
 
 void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef &MyCompletionGraphEvent)
 {
-	/**
-	* Инициализация рандомных данных и их отправка получателям
-	*/
+	// Инициализация рандомных данных и их отправка получателям
 
 	if (ME_StudentDataSender.IsValid())
 	{
@@ -27,6 +25,7 @@ void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, cons
 
 		for (int8 i = 0; !*rbIsStopTask && i < 20; ++i)
 		{
+			// Заполнение рандомными значениями
 			lStudentData = {
 			GetRandomNickname(),
 			GetRandomAge(),
@@ -36,6 +35,7 @@ void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, cons
 			// Имитация задержки данных
 			FPlatformProcess::Sleep(GetRandomFloat(0.1f, 1.f));
 
+			// При true: Быстрый выход и завершение потока
 			if (!*rbIsStopTask)
 				ME_StudentDataSender->Publish<FStudentData>(new FStudentData(lStudentData));
 		}

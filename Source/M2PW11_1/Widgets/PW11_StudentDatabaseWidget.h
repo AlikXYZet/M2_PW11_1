@@ -13,6 +13,7 @@
 
 // Тип предиката сортировки
 typedef bool (*Predicate)(const FStudentData &first, const FStudentData &second);
+//----------------------------------------------------------------------------------------
 
 
 
@@ -85,7 +86,7 @@ private:
 	// Указатель на виджет
 	UPW11_StudentDatabaseWidget *rSDWidget;
 
-	// Локальная база данных потока
+	// Локальная база данных потока. В нём данные сортируются и передаются виджету
 	TArray<FStudentData> LocalStudentDatabase;
 
 	// Текущий предикат сортировки
@@ -94,10 +95,10 @@ private:
 			return first.Nickname < second.Nickname;
 		};
 
-	// "Получатель" данных из другого потока
+	// Месседж-"Получатель" данных из потока-"Продюсера"
 	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataReceiver;
 
-	// "Обрабодчик" данных из другого потока
+	// Функция Месседжа: Обрабодка данных из потока-"Продюсера"
 	void BM_StudentDataHandler(
 		const struct FStudentData &Message,
 		const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context);
@@ -105,7 +106,7 @@ private:
 	// Функция делегата: Смена сортировки
 	void ReSortArray();
 
-	// Передача данных в Виджет
+	// Передача данных в Виджет с предварительной сортировкой
 	void SendDataToWidget();
 };
 //----------------------------------------------------------------------------------------
@@ -126,8 +127,10 @@ public:
 
 	~UPW11_StudentDatabaseWidget();
 
+	// Аналогичен простому Construct()
 	virtual void NativeConstruct() override;
 
+	// Аналогичен простому Tick(")
 	virtual void NativeTick(const FGeometry &MyGeometry, float InDeltaTime) override;
 	//--------------------------------------------
 
@@ -135,6 +138,7 @@ public:
 
 	/* ---   Delegates   --- */
 
+	// Делегат смены сортировки
 	FReSort OnReSort;
 	//--------------------------------------------
 
@@ -142,10 +146,14 @@ public:
 
 	/* ---   Database in Widget   --- */
 
-	TArray< FStudentData> ArrayStudentData;
+	// Локальная база данных о студентах, заполняется из потока-"Получателя"
+	TArray< FStudentData> WidgetStudentDatabase;
 
+	// Контроль обработки данных: если true, то сбрасывается и 
+	// запускается Event обновления данных в Виджете [ UpdateWidgetStudentData(") ]
 	bool bIsNewData = false;
 
+	// Перемменная типа сортировки
 	std::atomic<ESortType> CurrentSortType = ESortType::NicknameUp;
 
 	// Event обновления данных в Виджете
@@ -166,10 +174,10 @@ private:
 	FConsumer_Runnable *rConsumer_Class = nullptr;
 	FRunnableThread *rConsumer_Thread = nullptr;
 
-	// Создание потока-Получателя
+	// Создание потока-"Получателя"
 	void CreateConsumerThread();
 
-	// Останов потока-Получателя
+	// Останов потока-"Получателя"
 	void StopConsumerThread();
 	//--------------------------------------------
 };

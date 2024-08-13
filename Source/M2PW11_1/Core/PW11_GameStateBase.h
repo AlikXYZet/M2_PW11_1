@@ -13,17 +13,17 @@
 
 /* ---   TGraphTask   --- */
 
-/**Класс таска потока-Продюсера
- * @param Делегат для FOnNewStudentData
- */
+//Класс таска потока-"Продюсера"
 class FTask_ProducerOfStudentData
 {
-	// "Отправитель" данных
+	// Месседж-"Отправитель" данных
 	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataSender;
 
+	// Указатель на переменную контроля потока
 	std::atomic_bool *rbIsStopTask;
 
 public:
+
 	FTask_ProducerOfStudentData(std::atomic_bool *irbIsStopTask);
 
 	~FTask_ProducerOfStudentData() {}
@@ -79,9 +79,10 @@ public:
 
 	/* ---   FTask_ProducerOfStudentData   --- */
 
-	// Таск потока-Продюсера
+	// Таск потока-"Продюсера"
 	TGraphTask<FTask_ProducerOfStudentData> *rProducerTask = nullptr;
 
+	// Контроль работы потока-"Продюсера"
 	std::atomic_bool bIsStopTask = false;
 	//--------------------------------------------
 
@@ -99,13 +100,13 @@ private:
 
 	/* ---   Student Database   --- */
 
-	// "Получатель" данных
+	// "Получатель" данных для локального хранения
 	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataReceiver;
 
-	// База данных студентов
+	// Локальная база данных студентов
 	TMap<FString, FStudentData> StudentsDatabase;
 
-	// Реакция на делегат: Добавить одного студента
+	// Реакция на делегат: Сохранить данные студента
 	void DReact_AddStudent(const FStudentData &Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context);
 	//--------------------------------------------
 };

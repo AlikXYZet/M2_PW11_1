@@ -16,6 +16,7 @@ FConsumer_Runnable::FConsumer_Runnable(
 
 	rSDWidget = irSDWidget;
 
+	// Получение уже готовых данных (если пропустил)
 	for (auto &Data : iCurrentStudentDatabase)
 	{
 		LocalStudentDatabase.Add(Data.Value);
@@ -46,7 +47,7 @@ uint32 FConsumer_Runnable::Run()
 {
 	while (!bIsStopThread)
 	{
-		FPlatformProcess::Sleep(1.01f);
+		FPlatformProcess::Sleep(0.01f);
 	}
 
 	return 1;
@@ -76,6 +77,7 @@ void FConsumer_Runnable::BM_StudentDataHandler(const FStudentData &Message, cons
 
 void FConsumer_Runnable::ReSortArray()
 {
+	// Смена сортировки
 	switch (rSDWidget->CurrentSortType)
 	{
 	case ESortType::NicknameUp:
@@ -145,7 +147,7 @@ void FConsumer_Runnable::SendDataToWidget()
 {
 	LocalStudentDatabase.Sort(CurrentSortingPredicate);
 
-	rSDWidget->ArrayStudentData = LocalStudentDatabase;
+	rSDWidget->WidgetStudentDatabase = LocalStudentDatabase;
 
 	rSDWidget->bIsNewData = true;
 }
@@ -171,9 +173,10 @@ void UPW11_StudentDatabaseWidget::NativeTick(const FGeometry &MyGeometry, float 
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
+	// Если есть новые данные, то обновить их в Виджете 
 	if (bIsNewData)
 	{
-		UpdateWidgetStudentData(ArrayStudentData);
+		UpdateWidgetStudentData(WidgetStudentDatabase);
 		bIsNewData = false;
 	}
 }
@@ -185,6 +188,8 @@ void UPW11_StudentDatabaseWidget::NativeTick(const FGeometry &MyGeometry, float 
 
 void UPW11_StudentDatabaseWidget::SetSortType(const ESortType InSortType)
 {
+	// Если новый тип сортировки равен старому, то сменить на противоположный тип
+	// Например: новый и старый тип - это "A" по возростанию => сменить на "A" по убыванию
 	if (CurrentSortType == InSortType)
 		CurrentSortType = ESortType(uint8(InSortType) + 0x80);
 	else
