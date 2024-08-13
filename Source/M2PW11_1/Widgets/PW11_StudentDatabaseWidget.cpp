@@ -20,6 +20,8 @@ FConsumer_Runnable::FConsumer_Runnable(
 	{
 		LocalStudentDatabase.Add(Data.Value);
 	}
+
+	//UE_LOG(LogTemp, Error, TEXT("GameThreadId - %d"), FPlatformTLS::GetCurrentThreadId());
 }
 
 bool FConsumer_Runnable::Init()
@@ -68,7 +70,7 @@ void FConsumer_Runnable::Exit()
 void FConsumer_Runnable::BM_StudentDataHandler(const FStudentData &Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context)
 {
 	LocalStudentDatabase.Add(Message);
-	
+
 	SendDataToWidget();
 }
 
@@ -145,7 +147,7 @@ void FConsumer_Runnable::SendDataToWidget()
 
 	rSDWidget->ArrayStudentData = LocalStudentDatabase;
 
-	rSDWidget->OnUpdateWidgetData.ExecuteIfBound();
+	rSDWidget->bIsNewData = true;
 }
 //----------------------------------------------------------------------------------------
 
@@ -155,8 +157,6 @@ void FConsumer_Runnable::SendDataToWidget()
 
 UPW11_StudentDatabaseWidget::~UPW11_StudentDatabaseWidget()
 {
-	OnUpdateWidgetData.Unbind();
-
 	StopConsumerThread();
 }
 
@@ -165,18 +165,17 @@ void UPW11_StudentDatabaseWidget::NativeConstruct()
 	Super::NativeConstruct();
 
 	CreateConsumerThread();
-
-	OnUpdateWidgetData.BindUObject(this, &UPW11_StudentDatabaseWidget::PreparationListStudentData);
 }
-//----------------------------------------------------------------------------------------
 
-
-
-/* ---   Delegates   --- */
-
-void UPW11_StudentDatabaseWidget::PreparationListStudentData()
+void UPW11_StudentDatabaseWidget::NativeTick(const FGeometry &MyGeometry, float InDeltaTime)
 {
-	UpdateWidgetStudentData(ArrayStudentData);
+	Super::NativeTick(MyGeometry, InDeltaTime);
+
+	if (bIsNewData)
+	{
+		UpdateWidgetStudentData(ArrayStudentData);
+		bIsNewData = false;
+	}
 }
 //----------------------------------------------------------------------------------------
 

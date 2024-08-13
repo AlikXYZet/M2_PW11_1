@@ -19,7 +19,6 @@ typedef bool (*Predicate)(const FStudentData &first, const FStudentData &second)
 /* ---   Delegates   --- */
 
 DECLARE_DELEGATE(FReSort);
-DECLARE_DELEGATE(FUpdateWidgetData);
 //----------------------------------------------------------------------------------------
 
 
@@ -128,6 +127,8 @@ public:
 	~UPW11_StudentDatabaseWidget();
 
 	virtual void NativeConstruct() override;
+
+	virtual void NativeTick(const FGeometry &MyGeometry, float InDeltaTime) override;
 	//--------------------------------------------
 
 
@@ -135,9 +136,6 @@ public:
 	/* ---   Delegates   --- */
 
 	FReSort OnReSort;
-	FUpdateWidgetData OnUpdateWidgetData;
-
-	void PreparationListStudentData();
 	//--------------------------------------------
 
 
@@ -145,6 +143,8 @@ public:
 	/* ---   Database in Widget   --- */
 
 	TArray< FStudentData> ArrayStudentData;
+
+	bool bIsNewData = false;
 
 	std::atomic<ESortType> CurrentSortType = ESortType::NicknameUp;
 

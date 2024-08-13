@@ -86,8 +86,6 @@ void APW11_GameStateBase::Tick(float DeltaTime)
 
 void APW11_GameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 {
-	Super::EndPlay(EndPlayReason);
-
 	bIsStopTask = true;
 
 	ME_StudentDataReceiver.Reset();
@@ -95,6 +93,8 @@ void APW11_GameStateBase::EndPlay(const EEndPlayReason::Type EndPlayReason)
 	StudentsDatabase.Empty();
 
 	rProducerTask = nullptr;
+
+	Super::EndPlay(EndPlayReason);
 }
 //----------------------------------------------------------------------------------------
 
