@@ -86,9 +86,6 @@ private:
 	// Указатель на виджет
 	UPW11_StudentDatabaseWidget *rSDWidget;
 
-	// Локальная база данных потока. В нём данные сортируются и передаются виджету
-	TArray<FStudentData> LocalStudentDatabase;
-
 	// Текущий предикат сортировки
 	Predicate CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
 		{

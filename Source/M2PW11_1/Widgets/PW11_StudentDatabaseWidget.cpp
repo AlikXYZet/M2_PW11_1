@@ -19,7 +19,7 @@ FConsumer_Runnable::FConsumer_Runnable(
 	// Получение уже готовых данных (если пропустил)
 	for (auto &Data : iCurrentStudentDatabase)
 	{
-		LocalStudentDatabase.Add(Data.Value);
+		rSDWidget->WidgetStudentDatabase.Add(Data.Value);
 	}
 
 	//UE_LOG(LogTemp, Error, TEXT("GameThreadId - %d"), FPlatformTLS::GetCurrentThreadId());
@@ -64,13 +64,11 @@ void FConsumer_Runnable::Exit()
 
 	if (ME_StudentDataReceiver.IsValid())
 		ME_StudentDataReceiver.Reset();
-
-	LocalStudentDatabase.Empty();
 }
 
 void FConsumer_Runnable::BM_StudentDataHandler(const FStudentData &Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context)
 {
-	LocalStudentDatabase.Add(Message);
+	rSDWidget->WidgetStudentDatabase.Add(Message);
 
 	SendDataToWidget();
 }
@@ -145,9 +143,7 @@ void FConsumer_Runnable::ReSortArray()
 
 void FConsumer_Runnable::SendDataToWidget()
 {
-	LocalStudentDatabase.Sort(CurrentSortingPredicate);
-
-	rSDWidget->WidgetStudentDatabase = LocalStudentDatabase;
+	rSDWidget->WidgetStudentDatabase.Sort(CurrentSortingPredicate);
 
 	rSDWidget->bIsNewData = true;
 }
