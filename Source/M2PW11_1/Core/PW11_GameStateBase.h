@@ -20,11 +20,11 @@ class FTask_ProducerOfStudentData
 	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataSender;
 
 	// Указатель на переменную контроля потока
-	std::atomic_bool *rbIsStopTask;
+	std::atomic_bool* rbIsStopTask;
 
 public:
 
-	FTask_ProducerOfStudentData(std::atomic_bool *irbIsStopTask);
+	FTask_ProducerOfStudentData(std::atomic_bool* irbIsStopTask);
 
 	~FTask_ProducerOfStudentData() {}
 
@@ -48,7 +48,7 @@ public:
 
 	static ESubsequentsMode::Type GetSubsequentsMode() { return ESubsequentsMode::FireAndForget; }
 
-	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef &MyCompletionGraphEvent);
+	void DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& MyCompletionGraphEvent);
 };
 //----------------------------------------------------------------------------------------
 
@@ -80,7 +80,7 @@ public:
 	/* ---   FTask_ProducerOfStudentData   --- */
 
 	// Таск потока-"Продюсера"
-	TGraphTask<FTask_ProducerOfStudentData> *rProducerTask = nullptr;
+	TGraphTask<FTask_ProducerOfStudentData>* rProducerTask = nullptr;
 
 	// Контроль работы потока-"Продюсера"
 	std::atomic_bool bIsStopTask = false;
@@ -107,6 +107,6 @@ private:
 	TMap<FString, FStudentData> StudentsDatabase;
 
 	// Реакция на делегат: Сохранить данные студента
-	void DReact_AddStudent(const FStudentData &Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context);
+	void DReact_AddStudent(const FStudentData& Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe>& Context);
 	//--------------------------------------------
 };

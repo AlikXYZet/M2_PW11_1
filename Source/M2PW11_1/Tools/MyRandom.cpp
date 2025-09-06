@@ -1,6 +1,6 @@
 ﻿#include "MyRandom.h"
 
-int64 GetRandom(const int64 &min, const int64 &max)
+int64 GetRandom(const int64& min, const int64& max)
 {
 	std::random_device rd;
 	std::mt19937 gen(rd());
@@ -18,7 +18,7 @@ bool GetRandom()
 	return d(gen);
 }
 
-float GetRandomFloat(const float &min, const float &max)
+float GetRandomFloat(const float& min, const float& max)
 {
 	return GetRandom(min * 256, max * 256) / static_cast<float>(256);
 }

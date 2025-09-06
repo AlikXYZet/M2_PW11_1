@@ -9,7 +9,7 @@
 /* ---   Threads   --- */
 
 FConsumer_Runnable::FConsumer_Runnable(
-	UPW11_StudentDatabaseWidget *irSDWidget,
+	UPW11_StudentDatabaseWidget* irSDWidget,
 	const TMap<FString, FStudentData> iCurrentStudentDatabase)
 {
 	// in GameThread
@@ -17,7 +17,7 @@ FConsumer_Runnable::FConsumer_Runnable(
 	rSDWidget = irSDWidget;
 
 	// Получение уже готовых данных (если пропустил)
-	for (auto &Data : iCurrentStudentDatabase)
+	for (auto& Data : iCurrentStudentDatabase)
 	{
 		rSDWidget->WidgetStudentDatabase.Add(Data.Value);
 	}
@@ -66,7 +66,7 @@ void FConsumer_Runnable::Exit()
 		ME_StudentDataReceiver.Reset();
 }
 
-void FConsumer_Runnable::BM_StudentDataHandler(const FStudentData &Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context)
+void FConsumer_Runnable::BM_StudentDataHandler(const FStudentData& Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe>& Context)
 {
 	rSDWidget->WidgetStudentDatabase.Add(Message);
 
@@ -79,56 +79,56 @@ void FConsumer_Runnable::ReSortArray()
 	switch (rSDWidget->CurrentSortType)
 	{
 	case ESortType::NicknameUp:
-		CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
+		CurrentSortingPredicate = [](const FStudentData& first, const FStudentData& second)
 			{
 				return first.Nickname < second.Nickname;
 			};
 		break;
 
 	case ESortType::NicknameDown:
-		CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
+		CurrentSortingPredicate = [](const FStudentData& first, const FStudentData& second)
 			{
 				return first.Nickname > second.Nickname;
 			};
 		break;
 
 	case ESortType::AgeUp:
-		CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
+		CurrentSortingPredicate = [](const FStudentData& first, const FStudentData& second)
 			{
 				return first.Age < second.Age;
 			};
 		break;
 
 	case ESortType::AgeDown:
-		CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
+		CurrentSortingPredicate = [](const FStudentData& first, const FStudentData& second)
 			{
 				return first.Age > second.Age;
 			};
 		break;
 
 	case ESortType::RatingUp:
-		CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
+		CurrentSortingPredicate = [](const FStudentData& first, const FStudentData& second)
 			{
 				return first.Rating < second.Rating;
 			};
 		break;
 
 	case ESortType::RatingDown:
-		CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
+		CurrentSortingPredicate = [](const FStudentData& first, const FStudentData& second)
 			{
 				return first.Rating > second.Rating;
 			};
 		break;
 
 	case ESortType::IDUp:
-		CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
+		CurrentSortingPredicate = [](const FStudentData& first, const FStudentData& second)
 			{
 				return first.ID < second.ID;
 			};
 		break;
 
 	case ESortType::IDDown:
-		CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
+		CurrentSortingPredicate = [](const FStudentData& first, const FStudentData& second)
 			{
 				return first.ID > second.ID;
 			};
@@ -165,7 +165,7 @@ void UPW11_StudentDatabaseWidget::NativeConstruct()
 	CreateConsumerThread();
 }
 
-void UPW11_StudentDatabaseWidget::NativeTick(const FGeometry &MyGeometry, float InDeltaTime)
+void UPW11_StudentDatabaseWidget::NativeTick(const FGeometry& MyGeometry, float InDeltaTime)
 {
 	Super::NativeTick(MyGeometry, InDeltaTime);
 
@@ -185,7 +185,7 @@ void UPW11_StudentDatabaseWidget::NativeTick(const FGeometry &MyGeometry, float 
 void UPW11_StudentDatabaseWidget::SetSortType(const ESortType InSortType)
 {
 	// Если новый тип сортировки равен старому, то сменить на противоположный тип
-	// Например: новый и старый тип - это "A" по возростанию => сменить на "A" по убыванию
+	// Например: новый и старый тип - это "A" по возрастанию => сменить на "A" по убыванию
 	if (CurrentSortType == InSortType)
 		CurrentSortType = ESortType(uint8(InSortType) + 0x80);
 	else
@@ -205,7 +205,7 @@ void UPW11_StudentDatabaseWidget::CreateConsumerThread()
 	{
 		if (!rConsumer_Class)
 		{
-			APW11_GameStateBase *lGameStateBase = Cast<APW11_GameStateBase>(GetWorld()->GetGameState());
+			APW11_GameStateBase* lGameStateBase = Cast<APW11_GameStateBase>(GetWorld()->GetGameState());
 			rConsumer_Class = new FConsumer_Runnable(
 				this,
 				lGameStateBase->GetStudentsDatabase());

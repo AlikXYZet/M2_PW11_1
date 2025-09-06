@@ -12,7 +12,7 @@
 
 
 // Тип предиката сортировки
-typedef bool (*Predicate)(const FStudentData &first, const FStudentData &second);
+typedef bool (*Predicate)(const FStudentData& first, const FStudentData& second);
 //----------------------------------------------------------------------------------------
 
 
@@ -64,7 +64,7 @@ public:
 	* @param iCurrentStudentDatabase - Текущая база данных из GameStateBase
 	*/
 	FConsumer_Runnable(
-		UPW11_StudentDatabaseWidget *irSDWidget,
+		UPW11_StudentDatabaseWidget* irSDWidget,
 		const TMap<FString, FStudentData> iCurrentStudentDatabase);
 
 	virtual ~FConsumer_Runnable() override {};
@@ -80,14 +80,14 @@ public:
 private:
 
 	// Контроль работы потока
-    //FThreadSafeBool bIsStopThread = false;
+	//FThreadSafeBool bIsStopThread = false;
 	bool bIsStopThread = false;
 
 	// Указатель на виджет
-	UPW11_StudentDatabaseWidget *rSDWidget;
+	UPW11_StudentDatabaseWidget* rSDWidget;
 
 	// Текущий предикат сортировки
-	Predicate CurrentSortingPredicate = [](const FStudentData &first, const FStudentData &second)
+	Predicate CurrentSortingPredicate = [](const FStudentData& first, const FStudentData& second)
 		{
 			return first.Nickname < second.Nickname;
 		};
@@ -95,10 +95,10 @@ private:
 	// Месседж-"Получатель" данных из потока-"Продюсера"
 	TSharedPtr<FMessageEndpoint, ESPMode::ThreadSafe> ME_StudentDataReceiver;
 
-	// Функция Месседжа: Обрабодка данных из потока-"Продюсера"
+	// Функция Месседжа: Обработка данных из потока-"Продюсера"
 	void BM_StudentDataHandler(
-		const struct FStudentData &Message,
-		const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context);
+		const struct FStudentData& Message,
+		const TSharedRef<IMessageContext, ESPMode::ThreadSafe>& Context);
 
 	// Функция делегата: Смена сортировки
 	void ReSortArray();
@@ -128,7 +128,7 @@ public:
 	virtual void NativeConstruct() override;
 
 	// Аналогичен простому Tick(")
-	virtual void NativeTick(const FGeometry &MyGeometry, float InDeltaTime) override;
+	virtual void NativeTick(const FGeometry& MyGeometry, float InDeltaTime) override;
 	//--------------------------------------------
 
 
@@ -144,18 +144,18 @@ public:
 	/* ---   Database in Widget   --- */
 
 	// Локальная база данных о студентах, заполняется из потока-"Получателя"
-	TArray< FStudentData> WidgetStudentDatabase;
+	TArray<FStudentData> WidgetStudentDatabase;
 
 	// Контроль обработки данных: если true, то сбрасывается и 
 	// запускается Event обновления данных в Виджете [ UpdateWidgetStudentData(") ]
 	bool bIsNewData = false;
 
-	// Перемменная типа сортировки
+	// Переменная типа сортировки
 	std::atomic<ESortType> CurrentSortType = ESortType::NicknameUp;
 
 	// Event обновления данных в Виджете
 	UFUNCTION(BlueprintImplementableEvent, BlueprintPure, Category = "StudentData")
-	void UpdateWidgetStudentData(const TArray<FStudentData> &StudentDatabase);
+	void UpdateWidgetStudentData(const TArray<FStudentData>& StudentDatabase);
 
 	// Функция изменения типа сортировки
 	UFUNCTION(BlueprintCallable, Category = "StudentData")
@@ -168,8 +168,8 @@ private:
 
 	/* ---   Threads   --- */
 
-	FConsumer_Runnable *rConsumer_Class = nullptr;
-	FRunnableThread *rConsumer_Thread = nullptr;
+	FConsumer_Runnable* rConsumer_Class = nullptr;
+	FRunnableThread* rConsumer_Thread = nullptr;
 
 	// Создание потока-"Получателя"
 	void CreateConsumerThread();

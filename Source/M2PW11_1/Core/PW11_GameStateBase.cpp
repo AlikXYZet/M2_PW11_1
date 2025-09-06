@@ -8,14 +8,14 @@
 
 /* ---   FTask_ProducerOfStudentData   --- */
 
-FTask_ProducerOfStudentData::FTask_ProducerOfStudentData(std::atomic_bool *irbIsStopTask)
+FTask_ProducerOfStudentData::FTask_ProducerOfStudentData(std::atomic_bool* irbIsStopTask)
 {
 	rbIsStopTask = irbIsStopTask;
 
 	ME_StudentDataSender = FMessageEndpoint::Builder("Sender_Producer_Task").Build();;
 }
 
-void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef &MyCompletionGraphEvent)
+void FTask_ProducerOfStudentData::DoTask(ENamedThreads::Type CurrentThread, const FGraphEventRef& MyCompletionGraphEvent)
 {
 	// Инициализация рандомных данных и их отправка получателям
 
@@ -107,7 +107,7 @@ TMap<FString, FStudentData> APW11_GameStateBase::GetStudentsDatabase() const
 	return StudentsDatabase;
 }
 
-void APW11_GameStateBase::DReact_AddStudent(const FStudentData &Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe> &Context)
+void APW11_GameStateBase::DReact_AddStudent(const FStudentData& Message, const TSharedRef<IMessageContext, ESPMode::ThreadSafe>& Context)
 {
 	StudentsDatabase.Add(Message.Nickname, Message);
 
